@@ -49,10 +49,24 @@ namespace ECommerceTest
         public void ShouldReturnNotCharged()
         {
             // Arrange
+            var cardMock = new Mock<ICard>();
+            var addressInfoMock = new Mock<IAddressInfo>();
+            var paymentServiceMock = new Mock<IPaymentService>();
+            paymentServiceMock.Setup(p => p.Charge(It.IsAny<double>(), cardMock.Object)).Returns(false);
+
+            var cartServiceMock = new Mock<ICartService>();
+            var shipmentServiceMock = new Mock<IShipmentService>();
+
+            List<CartItem> items = new List<CartItem>();
+
+            CartController controller = new CartController(cartServiceMock.Object, paymentServiceMock.Object, shipmentServiceMock.Object);
 
             // Act
+            var result = controller.Checkout(cardMock.Object, addressInfoMock.Object);
 
             // Assert
+            Assert.AreEqual(result, "not charged");
+            shipmentServiceMock.Verify(s => s.Ship(addressInfoMock.Object, items.AsEnumerable()), Times.Never);
         }
 
 
